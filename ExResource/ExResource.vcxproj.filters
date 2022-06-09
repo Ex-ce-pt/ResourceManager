@@ -24,12 +24,18 @@
     <ClInclude Include="src\ExResource\Resource.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lib\UUID.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Impl\Resource.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Impl\ResourceStorageLoader.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lib\UUID.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

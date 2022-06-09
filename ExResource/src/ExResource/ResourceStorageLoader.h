@@ -6,48 +6,124 @@
 #include <memory>
 
 #include "Resource.h"
+#include "UUID.h"
 
 namespace ExResource {
 
 	class ResourceStorageLoader {
 	private:
-		using WeakResourceRef = std::weak_ptr<Resource>;
-		using ResourceRef = std::shared_ptr<Resource>;
-		using ResourceMap = std::unordered_map<std::string, ResourceRef>;
-		using InitFunc = std::function<std::pair<void*, size_t> (std::pair<void*, size_t>)>;
-
-		const char* path;
-		ResourceMap loadedResources;
-		std::unordered_map<std::string, size_t> entriesInCurrentFile;
-
-	private:
-		char skipNextWhitespaces(std::ifstream& stream) const;
-		std::string getNextEntryName(std::ifstream& stream) const;
-
-		// scanning
+		using WeakResourcePtr = std::weak_ptr<Resource>;
+		using ResourcePtr = std::shared_ptr<Resource>;
+		using ResourceMap = std::unordered_map<UUID, ResourcePtr>;
 
 	public:
 		ResourceStorageLoader();
 		ResourceStorageLoader(const std::string& path);
 		ResourceStorageLoader(const char* path);
 
+		/*
+		Scan the file to determine the resources stored in the file.
+		N.B. - setPath() must be called before using!
+		*/
 		void scanFile();
+
+		/*
+		Load a resource using a resource name
+		Args:
+		• const std::string& name - the name of the resource (corresponds to the path to the file in the original folder)		  
+		Return:
+		Loading success
+		*/
 		bool loadResource(const std::string& name);
+		/*
+		Load a resource using a resource name.
+		Args:
+		• const char* name - the name of the resource (corresponds to the path to the file in the original folder)
+		Return:
+		Loading success
+		*/
 		bool loadResource(const char* name);
-		bool loadResource(const std::string& name, const InitFunc& initFunc);
-		bool loadResource(const char* name, const InitFunc& initFunc);
 
+		/*
+		Release the resource thus freeing the memory.
+		Args:
+		• const std::string& name - the name of the resource to release
+		N.B. - Make sure that there's no shared pointers of the resource before releasing it!
+		*/
 		void releaseResource(const std::string& name);
-		void releaseResource(const ResourceRef& res);
-		void clearResources();
-		WeakResourceRef getResource(const std::string& entryName);
-		WeakResourceRef getResource(const char* entryName);
+		/*
+		Release the resource thus freeing the memory.
+		Args:
+		• const char* name - the name of the resource to release
+		N.B. - Make sure that there's no shared pointers of the resource before calling!
+		*/
+		void releaseResource(const char* name);
 
+		/*
+		Release the resource thus freeing the memory.
+		Args:
+		• const ResoucePtr& res- the resource to release
+		N.B. - Make sure that there's no shared pointers of the resource before calling!
+		*/
+		void releaseResource(const ResourcePtr& res);
+		
+		/*
+		Release all loaded resources.
+		N.B. - Make sure that there's no shared pointers of any of the resources before calling!
+		*/
+		void clearResources();
+
+		/*
+		Get a loaded resource.
+		Args:
+		• const std::string& entryName - the name of a loaded resource.
+		Return:
+		A weak pointer to the resource
+		*/
+		WeakResourcePtr getResource(const std::string& entryName);
+
+		/*
+		Get a loaded resource.
+		Args:
+		• const char* entryName - the name of a loaded resource.
+		Return:
+		A weak pointer to the resource
+		*/
+		WeakResourcePtr getResource(const char* entryName);
+
+		/*
+		Set a path to a resouce file.
+		Args:
+		• const std::string& path - a path to a resource file
+		*/
 		void setPath(const std::string& path);
+
+		/*
+		Set a path to a resouce file.
+		Args:
+		• const std::string& path - a path to a resource file
+		*/
 		void setPath(const char* path);
 
+		/*
+		Get the path to the current resouce file.
+		Return:
+		The path in std:::string class
+		*/
 		std::string getPath() const;
+
+		/*
+		Get the path to the current resouce file.
+		Return:
+		The path in raw form (const char*)
+		*/
 		const char* getPathRaw() const;
+
+	private:
+		const char* path;
+		ResourceMap loadedResources;
+		std::unordered_map<std::string, size_t> entriesInCurrentFile;
+
 	};
 
 }

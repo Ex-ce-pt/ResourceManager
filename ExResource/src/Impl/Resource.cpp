@@ -15,9 +15,11 @@ ExResource::Resource::Resource(const Resource& other) {
 }
 
 ExResource::Resource::Resource(Resource&& other) noexcept {
-	this->data = std::move(other.data);
+	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->entryName = std::string(other.entryName);
+
+	other.data = nullptr;
 }
 
 void ExResource::Resource::operator=(const Resource& other) {
@@ -29,13 +31,17 @@ void ExResource::Resource::operator=(const Resource& other) {
 
 void ExResource::Resource::operator=(Resource&& other) noexcept {
 	tryDelete();
-	this->data = std::move(other.data);
+	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->entryName = std::string(other.entryName);
+
+	other.data = nullptr;
 }
 
 bool ExResource::Resource::operator==(const Resource& other) const {
-	return data == other.data && dataSize == other.dataSize && entryName.compare(other.entryName) == 0;
+	return data == other.data &&
+			dataSize == other.dataSize &&
+			entryName.compare(other.entryName) == 0;
 }
 
 ExResource::Resource ExResource::Resource::copy() noexcept {
@@ -59,5 +65,5 @@ const char* ExResource::Resource::getEntryNameRaw() const {
 }
 
 inline void ExResource::Resource::tryDelete() {
-	if (data != nullptr) delete[] data;
+	delete[] data;
 }

@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "UUID.h"
+
 namespace ExResource {
 
 	class Resource {
@@ -9,6 +11,7 @@ namespace ExResource {
 		void* data;
 		size_t dataSize;
 		std::string entryName;
+		UUID uuid;
 
 		inline void tryDelete();
 
