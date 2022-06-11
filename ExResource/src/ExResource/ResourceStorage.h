@@ -4,22 +4,36 @@
 #include <functional>
 #include <unordered_map>
 #include <memory>
+#include <filesystem>
 
 #include "Resource.h"
-#include "UUID.h"
+#include "../Lib/UUID.h"
 
 namespace ExResource {
 
-	class ResourceStorageLoader {
+	class ResourceStorage {
 	private:
 		using WeakResourcePtr = std::weak_ptr<Resource>;
 		using ResourcePtr = std::shared_ptr<Resource>;
 		using ResourceMap = std::unordered_map<UUID, ResourcePtr>;
+		using ResourceSignature = std::pair<std::string, size_t>;
+
+		//using path_t = std::filesystem::path;
+		//using cpath_t = const path_t&;
 
 	public:
-		ResourceStorageLoader();
-		ResourceStorageLoader(const std::string& path);
-		ResourceStorageLoader(const char* path);
+		ResourceStorage();
+		ResourceStorage(const std::string& path);
+		ResourceStorage(const char* path);
+
+		/*
+		Stores a folder of files as a resource file.
+		Args:
+		• const std::string& folderPath - a path to a folder to store
+		• const std::string& outputFile - a path to a file the folder will be stored in
+		• const std::unordered_map<std::string, std::pair<std::string, std::string>>& attributes - a map, where key is a file path and value is a map of attributes for this file
+		*/
+		void storeAsResources(const std::string& folderPath, const std::string& output, const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& attributes = {});
 
 		/*
 		Scan the file to determine the resources stored in the file.
@@ -80,7 +94,7 @@ namespace ExResource {
 		Return:
 		A weak pointer to the resource
 		*/
-		WeakResourcePtr getResource(const std::string& entryName);
+		WeakResourcePtr getResource(const std::string& resourceName);
 
 		/*
 		Get a loaded resource.
@@ -89,7 +103,7 @@ namespace ExResource {
 		Return:
 		A weak pointer to the resource
 		*/
-		WeakResourcePtr getResource(const char* entryName);
+		WeakResourcePtr getResource(const char* resourceName);
 
 		/*
 		Set a path to a resouce file.
@@ -122,7 +136,7 @@ namespace ExResource {
 	private:
 		const char* path;
 		ResourceMap loadedResources;
-		std::unordered_map<std::string, size_t> entriesInCurrentFile;
+		std::unordered_map<std::string, size_t> resourcesInCurrentFile;
 
 	};
 

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ExResource\ResourceStorageLoader.h">
+    <ClInclude Include="src\ExResource\ResourceStorage.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="src\ExResource\ExResource.h">
@@ -32,7 +32,7 @@
     <ClCompile Include="src\Impl\Resource.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\Impl\ResourceStorageLoader.cpp">
+    <ClCompile Include="src\Impl\ResourceStorage.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Lib\UUID.cpp">

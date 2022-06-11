@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-#include <random>
+#include <stdint.h>
 
 typedef uint64_t UUID;
 

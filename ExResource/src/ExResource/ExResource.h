@@ -1,4 +1,4 @@
 #pragma once
 
 #include "Resource.h"
-#include "ResourceStorageLoader.h"
+#include "ResourceStorage.h"

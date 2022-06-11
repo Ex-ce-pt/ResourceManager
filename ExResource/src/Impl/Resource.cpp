@@ -1,39 +1,43 @@
 #include "Resource.h"
 
 ExResource::Resource::Resource()
-	: data(nullptr), dataSize(0), entryName()
+	: data(nullptr), dataSize(0), name(), uuid(createUUID())
 {}
 
 ExResource::Resource::~Resource() {
-	tryDelete();
+	delete[] data;
 }
 
 ExResource::Resource::Resource(const Resource& other) {
 	this->data = other.data;
 	this->dataSize = other.dataSize;
-	this->entryName = other.entryName;
+	this->name = other.name;
+	this->uuid = other.uuid;
 }
 
 ExResource::Resource::Resource(Resource&& other) noexcept {
 	this->data = other.data;
 	this->dataSize = other.dataSize;
-	this->entryName = std::string(other.entryName);
+	this->name = std::string(other.name);
+	this->uuid = other.uuid;
 
 	other.data = nullptr;
 }
 
 void ExResource::Resource::operator=(const Resource& other) {
-	tryDelete();
+	delete[] data;
 	this->data = other.data;
 	this->dataSize = other.dataSize;
-	this->entryName = other.entryName;
+	this->name = other.name;
+	this->uuid = other.uuid;
 }
 
 void ExResource::Resource::operator=(Resource&& other) noexcept {
-	tryDelete();
+	delete[] data;
 	this->data = other.data;
 	this->dataSize = other.dataSize;
-	this->entryName = std::string(other.entryName);
+	this->name = std::string(other.name);
+	this->uuid = other.uuid;
 
 	other.data = nullptr;
 }
@@ -41,7 +45,8 @@ void ExResource::Resource::operator=(Resource&& other) noexcept {
 bool ExResource::Resource::operator==(const Resource& other) const {
 	return data == other.data &&
 			dataSize == other.dataSize &&
-			entryName.compare(other.entryName) == 0;
+			name.compare(other.name) == 0 &&
+			uuid == other.uuid;
 }
 
 ExResource::Resource ExResource::Resource::copy() noexcept {
@@ -56,14 +61,18 @@ const size_t& ExResource::Resource::getSize() const {
 	return dataSize;
 }
 
-std::string ExResource::Resource::getEntryName() const {
-	return entryName;
+std::string ExResource::Resource::getName() const {
+	return name;
 }
 
-const char* ExResource::Resource::getEntryNameRaw() const {
-	return entryName.c_str();
+const char* ExResource::Resource::getNameRaw() const {
+	return name.c_str();
 }
 
-inline void ExResource::Resource::tryDelete() {
-	delete[] data;
+const std::unordered_map<std::string, std::string>& ExResource::Resource::getAttributes() const {
+	return attributes;
+}
+
+const UUID& ExResource::Resource::getUUID() const {
+	return uuid;
 }

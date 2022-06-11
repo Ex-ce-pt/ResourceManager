@@ -1,20 +1,13 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
-#include "UUID.h"
+#include "../Lib/UUID.h"
 
 namespace ExResource {
 
 	class Resource {
-	private:
-		void* data;
-		size_t dataSize;
-		std::string entryName;
-		UUID uuid;
-
-		inline void tryDelete();
-
 	public:
 		Resource();
 		Resource(const Resource& other);
@@ -30,13 +23,23 @@ namespace ExResource {
 
 		void* getPtr() const;
 		const size_t& getSize() const;
-		std::string getEntryName() const;
-		const char* getEntryNameRaw() const;
+		std::string getName() const;
+		const char* getNameRaw() const;
+		const std::unordered_map<std::string, std::string>& getAttributes() const;
+		const UUID& getUUID() const;
 
 		template<typename T>
 		T* castPtr() {
 			return static_cast<T*>(data);
 		}
+
+	private:
+		void* data;
+		size_t dataSize;
+		std::string name;
+		std::unordered_map<std::string, std::string> attributes;
+		UUID uuid;
+
 	};
 
 }

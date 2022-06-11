@@ -1,5 +1,8 @@
 #include "UUID.h"
 
+#include <string>
+#include <random>
+
 UUID createUUID() {
     static std::random_device dev;
     static std::mt19937 rng(dev());

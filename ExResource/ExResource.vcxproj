@@ -88,7 +88,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\ExResource</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\ExResource;$(ProjectDir)src\Lib;D:\Dev\ResourceManager\ExResource\src\Lib</AdditionalIncludeDirectories>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,7 +105,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\ExResource</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\ExResource;$(ProjectDir)src\Lib;D:\Dev\ResourceManager\ExResource\src\Lib</AdditionalIncludeDirectories>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,12 +149,12 @@
   <ItemGroup>
     <ClInclude Include="src\ExResource\ExResource.h" />
     <ClInclude Include="src\ExResource\Resource.h" />
-    <ClInclude Include="src\ExResource\ResourceStorageLoader.h" />
+    <ClInclude Include="src\ExResource\ResourceStorage.h" />
     <ClInclude Include="src\Lib\UUID.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Impl\Resource.cpp" />
-    <ClCompile Include="src\Impl\ResourceStorageLoader.cpp" />
+    <ClCompile Include="src\Impl\ResourceStorage.cpp" />
     <ClCompile Include="src\Lib\UUID.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

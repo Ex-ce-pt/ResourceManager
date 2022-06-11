@@ -1,5 +1,5 @@
-pathIn = 'tex.png';
-pathOut = 'tex1.resource'
+pathIn = 'test.txt';
+pathOut = 'test.resource'
 
 def readAll(file) -> bytes:
     buf = file.readlines()
@@ -8,12 +8,13 @@ def readAll(file) -> bytes:
         data += x
     return data
 
-def writeHeader(file, name: str, length: int, comments: tuple = None) -> None:
+def writeHeader(file, name: str, size: int, comments: tuple = None) -> None:
     file.write(f'"{name}":'.encode())
-    if not comments == None:
-        for x in comments:
-            file.write(f'\n\t"{x}"'.encode())
-    file.write(f'\n\tlength: {length}\n'.encode())
+    if comments:
+        for comment in comments:
+            if not comment.startswith('_'):
+                file.write(f'\n\t"{comment}"'.encode())
+    file.write(f'\n\t_resourceSize: {size}\n'.encode())
 
 def main() -> None:
     with open(pathOut, 'wb') as outFile:
