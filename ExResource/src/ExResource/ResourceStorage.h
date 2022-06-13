@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <unordered_map>
+#include <tuple>
 #include <memory>
 #include <filesystem>
 
@@ -12,11 +13,11 @@
 namespace ExResource {
 
 	class ResourceStorage {
-	private:
+	public:
 		using WeakResourcePtr = std::weak_ptr<Resource>;
 		using ResourcePtr = std::shared_ptr<Resource>;
 		using ResourceMap = std::unordered_map<UUID, ResourcePtr>;
-		using ResourceSignature = std::pair<std::string, size_t>;
+		using ResourceSignature = std::tuple<std::string, size_t, long>;
 
 		//using path_t = std::filesystem::path;
 		//using cpath_t = const path_t&;
@@ -133,10 +134,12 @@ namespace ExResource {
 		*/
 		const char* getPathRaw() const;
 
+		const std::vector<ResourceSignature>& getResourceSignaturesInCurrentFile() const;
+
 	private:
 		const char* path;
 		ResourceMap loadedResources;
-		std::unordered_map<std::string, size_t> resourcesInCurrentFile;
+		std::vector<ResourceSignature> resourcesInCurrentFile;
 
 	};
 

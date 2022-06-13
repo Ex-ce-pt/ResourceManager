@@ -4,11 +4,32 @@
 
 // Static functions for data processing
 
+static std::string getTrimmedStringFromCharArray(char* str, const size_t& len) {
+	char* beginResult = str;
+	char* endResult = str;
+	char *end = str + len;
+
+	for (char* i = str; i != end; i++) {
+		if (!isspace(*i) && *i != '\0') {
+			beginResult = i;
+			break;
+		}
+	}
+	for (char* i = end - 1; i != beginResult; i--) {
+		if (!isspace(*i) && *i != '\0') {
+			endResult = i + 1;
+			break;
+		}
+	}
+
+	return std::string(beginResult, endResult);
+}
+
 static inline void findNextQuotationMark(FILE* file) {
 	while (!feof(file) && fgetc(file) != '\"');
 }
 
-static std::string getNextName(FILE* file) {
+static std::tuple<std::string, long> getNextName(FILE* file) {
 	long nameBegin, nameLen;
 	char* buf;
 	std::string name;
@@ -25,7 +46,7 @@ static std::string getNextName(FILE* file) {
 	delete[] buf;
 	fseek(file, 1, SEEK_CUR);
 
-	return name;
+	return std::make_tuple(name, nameBegin - 1);
 }
 
 static size_t getNextResourceSize(FILE* file) {
@@ -36,8 +57,8 @@ static size_t getNextResourceSize(FILE* file) {
 	buf = new char[15];       // TODO: un-hard-code
 	while (!feof(file)) {
 		fgets(buf, 15, file);
-		char signature[] = { buf[0], buf[1], '\0' };
-		if (!strcmp(signature, "\t_")) {
+		char attributeSignature[] = { buf[0], buf[1], '\0' };
+		if (!strcmp(attributeSignature, "\t_")) {
 			if (!strcmp(buf, "\t_resourceSize")) {
 				delete[] buf;
 				if (fgetc(file) != ':') {
@@ -64,10 +85,13 @@ static size_t getNextResourceSize(FILE* file) {
 		}
 	}
 
+	printf("ERROR: file has ended before the resource size could be determined.");
+	exit(-1);
+
 }
 
-static std::pair<std::string, size_t> getNextResourceSignature(FILE* file) {
-	std::string name = getNextName(file);
+static ExResource::ResourceStorage::ResourceSignature getNextResourceSignature(FILE* file) {
+	auto [name, pos] = getNextName(file);
 	if (fgetc(file) != ':') {
 		printf("ERROR: no colon after the resource name.");
 		exit(-1);
@@ -81,7 +105,7 @@ static std::pair<std::string, size_t> getNextResourceSignature(FILE* file) {
 
 	fseek(file, size, SEEK_CUR);
 
-	return std::make_pair(name, size);
+	return std::make_tuple(name, size, pos);
 }
 
 // NOTE: "first" variable is a bad idea, there should be another way...
@@ -99,11 +123,11 @@ static void storeResource(FILE* inputFile, FILE* outputFile, const std::string& 
 	}
 	fprintf(outputFile, "\t%s: %i\n", "_resourceSize", size); // TODO: un-hard-code
 
-	char* buf = new char[size];
-	fgets(buf, size * sizeof(char), inputFile);
-	fwrite(buf, sizeof(char), size, outputFile);
-
-	delete[] buf;
+	// No fgets()
+	// fgets() stops reading data after a new line character.
+	for (size_t i = 0; i < size; i++) {
+		fputc(fgetc(inputFile), outputFile);
+	}
 
 }
 
@@ -165,10 +189,10 @@ void ExResource::ResourceStorage::scanFile() {
 		exit(-1);
 	}
 	fseek(file, 0, SEEK_SET);
-	
+
 	while (true) {
 		auto resourceSignature = getNextResourceSignature(file);
-		resourcesInCurrentFile.insert(resourceSignature);
+		resourcesInCurrentFile.push_back(resourceSignature);
 		
 		if (feof(file) || fgetc(file) <= '\0') break;
 	}
@@ -178,15 +202,95 @@ void ExResource::ResourceStorage::scanFile() {
 }
 
 bool ExResource::ResourceStorage::loadResource(const std::string& name) {
-	return loadResource(name.c_str());
+	if (path == nullptr) return false;
+
+	// Get the signature
+	const ResourceSignature* signature = nullptr;
+	for (const auto& i : resourcesInCurrentFile) {
+		if (!name.compare(std::get<0>(i))) {
+			signature = &i;
+			break;
+		}
+	}
+	if (signature == nullptr) return false;
+
+	FILE* file;
+	fopen_s(&file, path, "rb");
+	fseek(file, std::get<2>(*signature), SEEK_SET);
+
+	// Resource name checks
+	if (name.compare(std::get<0>(getNextName(file)))) {
+		printf("ERROR: found resource's name differs from the passed name.");
+		return false;
+	}
+	if (fgetc(file) != ':') {
+		printf("ERROR: no colon after the resource name.");
+		return false;
+	}
+	fseek(file, 1, SEEK_CUR);
+
+	// Get attributes
+	std::unordered_map<std::string, std::string> attributes;
+	char* buf;
+	while (!feof(file)) {
+		if (fgetc(file) != '\t') {
+			printf("ERROR: no tab before an attribute.");
+			return false;
+		}
+
+		char ch;
+		long keyBegin, keyLen, valueBegin, valueLen;
+		std::string key, value;
+
+		keyBegin = ftell(file);
+		while ((ch = fgetc(file)) != ':') {
+			if (ch == '\n') {
+				printf("ERROR: no colon after an attribute key.");
+				return false;
+			}
+		}
+		keyLen = ftell(file) - keyBegin;
+		fseek(file, keyBegin, SEEK_SET);
+		buf = new char[keyLen];
+		memset(buf, 0, keyLen);
+		fgets(buf, keyLen, file);
+		key = getTrimmedStringFromCharArray(buf, keyLen);
+		delete[] buf;
+
+		fseek(file, 1, SEEK_CUR);
+
+		valueBegin = ftell(file);
+		while (fgetc(file) != '\n');
+		valueLen = ftell(file) - valueBegin;
+		fseek(file, valueBegin, SEEK_SET);
+		buf = new char[valueLen];
+		memset(buf, 0, valueLen);
+		fgets(buf, valueLen, file);
+		value = getTrimmedStringFromCharArray(buf, valueLen);
+		delete[] buf;
+
+		attributes.emplace(key, value);
+
+		if (!key.compare("_resourceSize")) { // un-hard-code
+			break;
+		}
+	}
+	
+	// Store the resource
+	ResourcePtr resource = std::make_shared<Resource>();
+	resource->name = name;
+	resource->dataSize = std::get<1>(*signature);
+	resource->attributes.swap(attributes);
+	resource->data = nullptr;
+	loadedResources.emplace(resource->uuid, resource);
+
+	fclose(file);
+
+	return true;
 }
 
 bool ExResource::ResourceStorage::loadResource(const char* name) {
-	if (path == nullptr) return false;
-
-	// TODO: implement loading
-	
-	return false;
+	return loadResource(std::string(name));
 }
 
 void ExResource::ResourceStorage::releaseResource(const std::string& name) {
@@ -252,4 +356,8 @@ std::string ExResource::ResourceStorage::getPath() const {
 
 const char* ExResource::ResourceStorage::getPathRaw() const {
 	return path;
+}
+
+const std::vector<ExResource::ResourceStorage::ResourceSignature>& ExResource::ResourceStorage::getResourceSignaturesInCurrentFile() const {
+	return resourcesInCurrentFile;
 }

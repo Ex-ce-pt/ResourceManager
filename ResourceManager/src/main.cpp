@@ -27,6 +27,22 @@ void testBoth() {
 	resourceLoader->storeAsResources("res/test/", filename);
 
 	resourceLoader->scanFile();
+
+	for (const auto& i : resourceLoader->getResourceSignaturesInCurrentFile()) {
+		const std::string& resourceName = std::get<0>(i);
+
+		resourceLoader->loadResource(resourceName);
+
+		const auto& res = resourceLoader->getResource(resourceName).lock();
+
+		printf("=========\n");
+		printf("name: \"%s\"\nsize: %lu\nUUID: %lu\nAttributes:\n", res->getNameRaw(), res->getSize(), res->getUUID());
+		for (const auto& i : res->getAttributes()) {
+			printf("%s - %s\n", i.first.c_str(), i.second.c_str());
+		}
+		printf("=========\n");
+
+	}
 }
 
 int main() {

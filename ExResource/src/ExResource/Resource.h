@@ -40,6 +40,8 @@ namespace ExResource {
 		std::unordered_map<std::string, std::string> attributes;
 		UUID uuid;
 
+		friend class ResourceStorage;
+
 	};
 
 }
