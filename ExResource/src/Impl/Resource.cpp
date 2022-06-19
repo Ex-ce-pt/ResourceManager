@@ -1,4 +1,4 @@
-#include "Resource.h"
+#include "../ExResource/Resource.h"
 
 ExResource::Resource::Resource()
 	: data(nullptr), dataSize(0), name(), uuid(createUUID())
@@ -9,6 +9,8 @@ ExResource::Resource::~Resource() {
 }
 
 ExResource::Resource::Resource(const Resource& other) {
+	if (*this == other) return;
+
 	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->name = other.name;
@@ -16,6 +18,8 @@ ExResource::Resource::Resource(const Resource& other) {
 }
 
 ExResource::Resource::Resource(Resource&& other) noexcept {
+	if (*this == other) return;
+
 	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->name = std::string(other.name);
@@ -25,7 +29,9 @@ ExResource::Resource::Resource(Resource&& other) noexcept {
 }
 
 void ExResource::Resource::operator=(const Resource& other) {
-	delete[] data;
+	if (*this == other) return;
+
+	//delete[] data;
 	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->name = other.name;
@@ -33,7 +39,9 @@ void ExResource::Resource::operator=(const Resource& other) {
 }
 
 void ExResource::Resource::operator=(Resource&& other) noexcept {
-	delete[] data;
+	if (*this == other) return;
+
+	//delete[] data;
 	this->data = other.data;
 	this->dataSize = other.dataSize;
 	this->name = std::string(other.name);

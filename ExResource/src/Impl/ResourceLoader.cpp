@@ -1,4 +1,4 @@
-#include "ResourceStorage.h"
+#include "../ExResource/ResourceLoader.h"
 
 #include <stdio.h>
 
@@ -90,7 +90,7 @@ static size_t getNextResourceSize(FILE* file) {
 
 }
 
-static ExResource::ResourceStorage::ResourceSignature getNextResourceSignature(FILE* file) {
+static ExResource::ResourceLoader::ResourceSignature getNextResourceSignature(FILE* file) {
 	auto [name, pos] = getNextName(file);
 	if (fgetc(file) != ':') {
 		printf("ERROR: no colon after the resource name.");
@@ -108,80 +108,21 @@ static ExResource::ResourceStorage::ResourceSignature getNextResourceSignature(F
 	return std::make_tuple(name, size, pos);
 }
 
-// NOTE: "first" variable is a bad idea, there should be another way...
-static void storeResource(FILE* inputFile, FILE* outputFile, const std::string& name, const std::unordered_map<std::string, std::string>& attributes, bool first) {
-
-	fseek(inputFile, 0, SEEK_END);
-	size_t size = ftell(inputFile) + 1;
-	fseek(inputFile, 0, SEEK_SET);
-
-	if (!first) fputc('\n', outputFile);
-
-	fprintf(outputFile, "\"%s\":\n", name.c_str());
-	for (const auto& i : attributes) {
-		fprintf(outputFile, "\t%s: %s\n", i.first.c_str(), i.second.c_str());
-	}
-	fprintf(outputFile, "\t%s: %i\n", "_resourceSize", size); // TODO: un-hard-code
-
-	// No fgets()
-	// fgets() stops reading data after a new line character.
-	for (size_t i = 0; i < size; i++) {
-		fputc(fgetc(inputFile), outputFile);
-	}
-
-}
-
 /////////////
 
-ExResource::ResourceStorage::ResourceStorage() :
-	ResourceStorage("")
+ExResource::ResourceLoader::ResourceLoader() :
+	ResourceLoader("")
 {}
 
-ExResource::ResourceStorage::ResourceStorage(const char* path) :
+ExResource::ResourceLoader::ResourceLoader(const char* path) :
 	path(path)
 {}
 
-ExResource::ResourceStorage::ResourceStorage(const std::string& path) :
-	ResourceStorage(path.c_str())
+ExResource::ResourceLoader::ResourceLoader(const std::string& path) :
+	ResourceLoader(path.c_str())
 {}
 
-void ExResource::ResourceStorage::storeAsResources(const std::string& folderPath, const std::string& output, const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& attributes) {
-	using namespace std::filesystem;
-	if (!is_directory(folderPath)) {
-		printf("ERROR: folderPath folder does not exist.");
-		return;
-	}
-
-	FILE* outputFile;
-	fopen_s(&outputFile, output.c_str(), "wb");
-
-	bool first = true;
-	for (const auto& i : recursive_directory_iterator(folderPath)) {
-		if (!i.is_regular_file() || !i.exists()) continue;
-		FILE* inputFile;
-		_wfopen_s(&inputFile, i.path().c_str(), L"rb");
-
-		// bad!
-		const std::wstring p = std::wstring(i.path().c_str());
-		std::string name;
-
-		std::transform(p.begin(), p.end(), std::back_inserter(name), [](wchar_t c) {
-			return (char) c;
-		});
-		//
-
-		storeResource(inputFile, outputFile, name, {}, first);
-
-		if (first) first = false;
-
-		fclose(inputFile);
-	}
-
-	fclose(outputFile);
-
-}
-
-void ExResource::ResourceStorage::scanFile() {
+void ExResource::ResourceLoader::scanFile() {
 
 	FILE* file;
 	if (fopen_s(&file, path, "rb")) {
@@ -195,13 +136,14 @@ void ExResource::ResourceStorage::scanFile() {
 		resourcesInCurrentFile.push_back(resourceSignature);
 		
 		if (feof(file) || fgetc(file) <= '\0') break;
+		fseek(file, -1, SEEK_CUR);
 	}
 
 	fclose(file);
 
 }
 
-bool ExResource::ResourceStorage::loadResource(const std::string& name) {
+bool ExResource::ResourceLoader::loadResource(const std::string& name) {
 	if (path == nullptr) return false;
 
 	// Get the signature
@@ -275,13 +217,21 @@ bool ExResource::ResourceStorage::loadResource(const std::string& name) {
 			break;
 		}
 	}
+	fseek(file, 1, SEEK_CUR);
+
+	// Get the data
+	size_t size = std::get<1>(*signature) - 1;
+	buf = new char[size + 1];
+	for (size_t i = 0; i < size; i++)
+		buf[i] = fgetc(file);
+	buf[size] = '\0';
 	
 	// Store the resource
 	ResourcePtr resource = std::make_shared<Resource>();
 	resource->name = name;
-	resource->dataSize = std::get<1>(*signature);
+	resource->dataSize = size;
 	resource->attributes.swap(attributes);
-	resource->data = nullptr;
+	resource->data = buf;
 	loadedResources.emplace(resource->uuid, resource);
 
 	fclose(file);
@@ -289,11 +239,11 @@ bool ExResource::ResourceStorage::loadResource(const std::string& name) {
 	return true;
 }
 
-bool ExResource::ResourceStorage::loadResource(const char* name) {
+bool ExResource::ResourceLoader::loadResource(const char* name) {
 	return loadResource(std::string(name));
 }
 
-void ExResource::ResourceStorage::releaseResource(const std::string& name) {
+void ExResource::ResourceLoader::releaseResource(const std::string& name) {
 	for (auto i : loadedResources) {
 		if (!name.compare(i.second->getName())) {
 			loadedResources.erase(i.first);
@@ -302,7 +252,7 @@ void ExResource::ResourceStorage::releaseResource(const std::string& name) {
 	}
 }
 
-void ExResource::ResourceStorage::releaseResource(const char* name) {
+void ExResource::ResourceLoader::releaseResource(const char* name) {
 	for (auto i : loadedResources) {
 		if (!strcmp(name, i.second->getNameRaw())) {
 			loadedResources.erase(i.first);
@@ -311,19 +261,19 @@ void ExResource::ResourceStorage::releaseResource(const char* name) {
 	}
 }
 
-void ExResource::ResourceStorage::releaseResource(const ResourcePtr& res) {
+void ExResource::ResourceLoader::releaseResource(const ResourcePtr& res) {
 	for (auto& i : loadedResources) {
 		if (i.second == res)
 			loadedResources.erase(i.first);
 	}
 }
 
-void ExResource::ResourceStorage::clearResources() {
+void ExResource::ResourceLoader::clearResources() {
 	loadedResources.clear();
 }
 
-ExResource::ResourceStorage::WeakResourcePtr 
-ExResource::ResourceStorage::getResource(const std::string& entryName) {
+ExResource::ResourceLoader::WeakResourcePtr 
+ExResource::ResourceLoader::getResource(const std::string& entryName) {
 	for (auto& i : loadedResources) {
 		if (!entryName.compare(i.second->getName())) {
 			return i.second;
@@ -332,7 +282,7 @@ ExResource::ResourceStorage::getResource(const std::string& entryName) {
 	return WeakResourcePtr();
 }
 
-ExResource::ResourceStorage::WeakResourcePtr  ExResource::ResourceStorage::getResource(const char* entryName) {
+ExResource::ResourceLoader::WeakResourcePtr  ExResource::ResourceLoader::getResource(const char* entryName) {
 	for (auto& i : loadedResources) {
 		if (!strcmp(entryName, i.second->getNameRaw())) {
 			return i.second;
@@ -341,23 +291,23 @@ ExResource::ResourceStorage::WeakResourcePtr  ExResource::ResourceStorage::getRe
 	return WeakResourcePtr();
 }
 
-void ExResource::ResourceStorage::setPath(const std::string& path) {
+void ExResource::ResourceLoader::setPath(const std::string& path) {
 	setPath(path.c_str());
 }
 
-void ExResource::ResourceStorage::setPath(const char* path) {
+void ExResource::ResourceLoader::setPath(const char* path) {
 	clearResources();
 	this->path = path;
 }
 
-std::string ExResource::ResourceStorage::getPath() const {
+std::string ExResource::ResourceLoader::getPath() const {
 	return std::string(path);
 }
 
-const char* ExResource::ResourceStorage::getPathRaw() const {
+const char* ExResource::ResourceLoader::getPathRaw() const {
 	return path;
 }
 
-const std::vector<ExResource::ResourceStorage::ResourceSignature>& ExResource::ResourceStorage::getResourceSignaturesInCurrentFile() const {
+const std::vector<ExResource::ResourceLoader::ResourceSignature>& ExResource::ResourceLoader::getResourceSignaturesInCurrentFile() const {
 	return resourcesInCurrentFile;
 }
