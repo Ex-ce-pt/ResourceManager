@@ -29,16 +29,16 @@ You are not meant to create an instance of the class yourself, it's a work for *
 <tr><td><code>const char* getNameRaw() const</code></td><td>Returns the resource's name as a C string (see `std::string getName() const`).</td></tr>
 <tr><td><code>const std::unordered_map<std::string, std::string>& getAttributes() const</code></td><td>Returns the resource's attributes.</td></tr>
 <tr><td><code>const UUID& getUUID() const</code></td><td>Returns the resource's UUID.</td></tr>
-<tr><td><code>template<typename T> T* castPtr()</code></td><td>Returns the pointer to the resource's data (see `void* getPtr() const`) casted to the type `T*`.</td></tr>
+<tr><td><code>template&lt;typename T&gt; T* castPtr()</code></td><td>Returns the pointer to the resource's data (see `void* getPtr() const`) casted to the type `T*`.</td></tr>
 </tbody></table>
 
 ---
 ### ResourceSaver class
-**ResourceSaver** class is a class with one single meaning - to pack files into a `.resource` file.\
+**ResourceSaver** class is a class with one single meaning - to pack files into a `.resource` file.
 
 <table><tbody><tr>
 <td><code>
-static void storeAsResources(const std::string& folderPath, const std::string& output, const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& attributes = {})
+static void storeAsResources(const std::string& folderPath, const std::string& output, const std::unordered_map&lt;std::string, std::unordered_map&lt;std::string, std::string&gt;&gt;& attributes = {})
 </code></td>
 <td>
 Stores a folder of files as a resource file.
@@ -50,3 +50,9 @@ Args:
 </ul>
 </td>
 </tr></tbody></table>
+
+---
+### ResourceLoader class
+**ResourceLoader** class is a class that can load and store resources.
+
+<img src="https://images.squarespace-cdn.com/content/v1/54acb7a2e4b0170492f6554d/1461692832097-WX6HF4AOGGBNYS1YRAM7/image-asset.png">
