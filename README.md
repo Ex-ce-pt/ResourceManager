@@ -46,6 +46,7 @@ You are not meant to create an instance of the class yourself, it's a work for *
 ---
 ### ResourceSaver class
 **ResourceSaver** class is a class with one single meaning - to pack files into a `.resource` file.\
+<hr>
 `static void storeAsResources(const std::string& folderPath, const std::string& output, const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& attributes = {});`\
 Stores a folder of files as a resource file.\
 Args:
