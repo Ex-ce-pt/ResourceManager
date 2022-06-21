@@ -31,33 +31,33 @@ namespace ExResource {
 		void scanFile();
 
 		/*
-		Load a resource using a resource name
+		Load a resource using a resource name.
 		Args:
-		• const std::string& name - the name of the resource (corresponds to the path to the file in the original folder)		  
-		Return:
-		Loading success
+		• const std::string& name - the name of the resource (corresponds to the path to the file in the original folder).	  
+		Returns:
+		• Loading success
 		*/
 		bool loadResource(const std::string& name);
 		/*
 		Load a resource using a resource name.
 		Args:
-		• const char* name - the name of the resource (corresponds to the path to the file in the original folder)
-		Return:
-		Loading success
+		• const char* name - the name of the resource (corresponds to the path to the file in the original folder).
+		Returns:
+		• Loading success
 		*/
 		bool loadResource(const char* name);
 
 		/*
 		Release the resource thus freeing the memory.
 		Args:
-		• const std::string& name - the name of the resource to release
+		• const std::string& name - the name of the resource to release.
 		N.B. - Make sure that there's no shared pointers of the resource before releasing it!
 		*/
 		void releaseResource(const std::string& name);
 		/*
 		Release the resource thus freeing the memory.
 		Args:
-		• const char* name - the name of the resource to release
+		• const char* name - the name of the resource to release.
 		N.B. - Make sure that there's no shared pointers of the resource before calling!
 		*/
 		void releaseResource(const char* name);
@@ -65,7 +65,7 @@ namespace ExResource {
 		/*
 		Release the resource thus freeing the memory.
 		Args:
-		• const ResoucePtr& res- the resource to release
+		• const ResoucePtr& res - the resource to release
 		N.B. - Make sure that there's no shared pointers of the resource before calling!
 		*/
 		void releaseResource(const ResourcePtr& res);
@@ -80,8 +80,8 @@ namespace ExResource {
 		Get a loaded resource.
 		Args:
 		• const std::string& entryName - the name of a loaded resource.
-		Return:
-		A weak pointer to the resource
+		Returns:
+		• A weak pointer to the resource.
 		*/
 		WeakResourcePtr getResource(const std::string& resourceName);
 
@@ -89,39 +89,45 @@ namespace ExResource {
 		Get a loaded resource.
 		Args:
 		• const char* entryName - the name of a loaded resource.
-		Return:
-		A weak pointer to the resource
+		Returns:
+		• A weak pointer to the resource.
 		*/
 		WeakResourcePtr getResource(const char* resourceName);
 
 		/*
 		Set a path to a resouce file.
 		Args:
-		• const std::string& path - a path to a resource file
+		• const std::string& path - a path to a resource file.
 		*/
 		void setPath(const std::string& path);
 
 		/*
 		Set a path to a resouce file.
 		Args:
-		• const std::string& path - a path to a resource file
+		• const std::string& path - a path to a resource file.
 		*/
 		void setPath(const char* path);
 
 		/*
 		Get the path to the current resouce file.
-		Return:
-		The path in std:::string class
+		Returns:
+		• The path in std:::string class.
 		*/
 		std::string getPath() const;
 
 		/*
 		Get the path to the current resouce file.
-		Return:
-		The path in raw form (const char*)
+		Returns:
+		The path as a C string.
 		*/
 		const char* getPathRaw() const;
 
+		/*
+		Get the resource signatures from the current file.
+		Returns:
+		• a vector of resource signatures.
+		N.B. - scanFile() must be called before using!
+		*/
 		const std::vector<ResourceSignature>& getResourceSignaturesInCurrentFile() const;
 
 	private:
