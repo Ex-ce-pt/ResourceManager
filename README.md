@@ -169,7 +169,7 @@
         <ul>
 		    <li><code>const char* name</code> - the name of the resource (corresponds to the path to the file in the original folder)</li>
         </ul>
-		Return:
+		Returns:
         <ul>
 		    <li>Loading success</li>
         </ul>
@@ -297,7 +297,7 @@
 
 </tbody></table>
 
-<!-->
+<!--
 <img src="https://images.squarespace-cdn.com/content/v1/54acb7a2e4b0170492f6554d/1461692832097-WX6HF4AOGGBNYS1YRAM7/image-asset.png">
 
 <tr>
