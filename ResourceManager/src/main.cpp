@@ -60,4 +60,4 @@ int main() {
 }
 
 // TODO: make an exception system
-// TODO: switch to wchar_t (std::filesystem::path) paths
+// TODO: update the doc

@@ -35,4 +35,4 @@
 Debug/
 Release/
 .vs/
-!ExResource.lib
+!ExResource/bin/*.lib

@@ -4,8 +4,9 @@
 <p>It works just like an ordinary file system.</p>
 
 <p>By <b>Exedice</b></p>
-<p><code>v. 1.0</code> - <i>19.06.2022</i></p>
-<p>Status: <code>stable build</code></p>
+<p><code>v. 1.1</code> - <i>30.06.2022</i></p>
+<p>Status: <code>experimental build</code></p>
+<p><b>NOTE: </b> This is an experimental build. Define <code>EXRESOURCE_EXPERIMENTAL_ENABLE</code> to access the latest features.</p>
 
 <h2>Documentation</h2>
 

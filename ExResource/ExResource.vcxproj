@@ -153,12 +153,18 @@
     <ClInclude Include="src\ExResource\Resource.h" />
     <ClInclude Include="src\ExResource\ResourceLoader.h" />
     <ClInclude Include="src\ExResource\ResourceSaver.h" />
+    <ClInclude Include="src\ExResource\WResource.h" />
+    <ClInclude Include="src\ExResource\WResourceLoader.h" />
+    <ClInclude Include="src\ExResource\WResourceSaver.h" />
     <ClInclude Include="src\Lib\UUID.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Impl\Resource.cpp" />
     <ClCompile Include="src\Impl\ResourceLoader.cpp" />
     <ClCompile Include="src\Impl\ResourceSaver.cpp" />
+    <ClCompile Include="src\Impl\WResource.cpp" />
+    <ClCompile Include="src\Impl\WResourceLoader.cpp" />
+    <ClCompile Include="src\Impl\WResourceSaver.cpp" />
     <ClCompile Include="src\Lib\UUID.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
